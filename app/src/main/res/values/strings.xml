@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Foodie</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_caterogy">CaterogyActivity</string>
+    <string name="select_area">Select Area</string>
+    <string name="categories">Categories</string>
+    <string name="foodie_s_special">FOODIE\'S SPECIAL</string>
+
+    <string-array name="area_list">
+        <item>Indian</item>
+        <item>American</item>
+        <item>Spanish</item>
+        <item>Italian</item>
+        <item>Thai</item>
+        <item>Chinese</item>
+    </string-array>
+</resources>
