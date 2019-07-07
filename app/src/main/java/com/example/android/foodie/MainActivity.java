@@ -29,23 +29,31 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodItemClickListener, RandomAdapter.AreaItemClickListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodItemClickListener,
+        RandomAdapter.AreaItemClickListener,
+        AdapterView.OnItemSelectedListener, ChickenAdapter.OnChickenItemClickListener {
 
     RecyclerView recyclerView;
     RecyclerView areaRecycler;
+    RecyclerView chickenRecycler;
+
     RandomAdapter randomAdapter;
     FoodAdapter foodAdapter;
+    ChickenAdapter chickenAdapter;
+
     ProgressBar progressBar;
-    TextView textView;
+
     FoodViewModel foodViewModel;
-    String key = "dee6af799efce817f961668c5eaddcf2";
-    String area = "";
+
     TextView heading;
     TextView heading2;
+    TextView chicken;
     TextView randomFood;
     ImageView randomImage;
     CardView randomCard;
+
     int randomId;
+    String area = "";
     String name;
     Spinner areaSpinner;
     ProgressBar areaLoading;
@@ -60,17 +68,20 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
 
         //Setting up spinner to choose area
         areaSpinner = findViewById(R.id.area_spinner);
-        ArrayAdapter<CharSequence>arrayAdapter = ArrayAdapter.createFromResource(this,R.array.area_list,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.area_list, android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         areaSpinner.setAdapter(arrayAdapter);
         areaSpinner.setOnItemSelectedListener(this);
 
         areaLoading = findViewById(R.id.area_loading);
         progressBar = findViewById(R.id.progressBar);
-        textView = findViewById(R.id.textView);
+
         progressBar.setVisibility(View.VISIBLE);
+
         heading = findViewById(R.id.heading);
         heading2 = findViewById(R.id.heading2);
+        chicken = findViewById(R.id.chicken);
+
         randomImage = findViewById(R.id.random_img);
         randomFood = findViewById(R.id.random_food);
         randomCard = findViewById(R.id.random_card);
@@ -89,15 +100,18 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
         //Initializing category recyclerView
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this,RecyclerView.HORIZONTAL,false));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 
         //Initializing area recyclerView
         areaRecycler = findViewById(R.id.random_recycler);
         areaRecycler.setHasFixedSize(true);
-        areaRecycler.setLayoutManager(new LinearLayoutManager(this,RecyclerView.HORIZONTAL,false));
+        areaRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 
-        recyclerView.setNestedScrollingEnabled(false);
-        areaRecycler.setNestedScrollingEnabled(false);
+        //Initializing Chicken recyclerView and getting chicken item list
+        chickenRecycler = findViewById(R.id.chicken_recycler);
+        chickenRecycler.setHasFixedSize(true);
+        chickenRecycler.setLayoutManager(new LinearLayoutManager(MainActivity.this, RecyclerView.HORIZONTAL, false));
+
 
         //Initializing foodViewModel and getting list of food categories
         foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
@@ -110,8 +124,7 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
                     foodAdapter = new FoodAdapter(MainActivity.this, MainActivity.this, foods);
                     recyclerView.setAdapter(foodAdapter);
                 } else {
-                    textView.setText("Failed to fetch data");
-                    Log.d("MainAcitvity", "Failed to fetch data");
+                    Log.d("MainActivity", "Failed to fetch data");
                     Toast.makeText(MainActivity.this, "Failed to fetch data", Toast.LENGTH_LONG).show();
                 }
             }
@@ -122,11 +135,11 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
         foodViewModel.getRandom().observe(this, new Observer<FoodCategory>() {
             @Override
             public void onChanged(FoodCategory foodCategory) {
-                if (foodCategory != null){
+                if (foodCategory != null) {
                     Picasso.get().load(foodCategory.getFoodImage())
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .error(R.drawable.ic_launcher_background)
-                            .resize(4000,6000)
+                            .resize(4000, 6000)
                             .onlyScaleDown()
                             .centerInside()
                             .into(randomImage);
@@ -136,6 +149,18 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
                     randomCard.setVisibility(View.VISIBLE);
                 }
 
+            }
+        });
+
+        //Getting chicken items list
+        foodViewModel.getChickenItems().observe(this, new Observer<List<FoodCategory>>() {
+            @Override
+            public void onChanged(List<FoodCategory> foodCategoryList) {
+                if (foodCategoryList != null) {
+                    chicken.setVisibility(View.VISIBLE);
+                     chickenAdapter = new ChickenAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
+                    chickenRecycler.setAdapter(chickenAdapter);
+                }
             }
         });
     }
@@ -183,9 +208,20 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
     public void onAreaClick(int position) {
 
         //Starting FoodDetailsActivity when user click on any item from areaRecycler
-        Intent detailIntent = new Intent(MainActivity.this,FoodDetailsActiviy.class);
-        detailIntent.putExtra("areaId",randomAdapter.getAreaFood(position));
+        Intent detailIntent = new Intent(MainActivity.this, FoodDetailsActiviy.class);
+        detailIntent.putExtra("areaId", randomAdapter.getAreaFood(position));
         startActivity(detailIntent);
+    }
+
+    @Override
+    public void onChickenItemClick(int position) {
+
+
+
+        Intent intent = new Intent(MainActivity.this, FoodDetailsActiviy.class);
+        intent.putExtra("drinkId", chickenAdapter.getDrink(position));
+        startActivity(intent);
+
     }
 
     @Override
@@ -195,17 +231,17 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
         area = parent.getItemAtPosition(position).toString();
 
         //Getting list of food item as per area
-        foodViewModel.getRandomFoodList(area).observe(this, new Observer<List<FoodCategory>>() {
+        foodViewModel.getFoodByArea(area).observe(this, new Observer<List<FoodCategory>>() {
             @Override
             public void onChanged(List<FoodCategory> foodCategoryList) {
                 if (foodCategoryList != null) {
                     heading2.setVisibility(View.VISIBLE);
                     areaSpinner.setVisibility(View.VISIBLE);
                     areaLoading.setVisibility(View.GONE);
-                    randomAdapter = new RandomAdapter(MainActivity.this,MainActivity.this, foodCategoryList);
+                    randomAdapter = new RandomAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
                     areaRecycler.setAdapter(randomAdapter);
-                }else {
-                    Toast.makeText(getApplicationContext(),"Empty List",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Empty List", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -214,4 +250,5 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
     }
+
 }

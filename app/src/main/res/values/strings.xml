@@ -5,6 +5,10 @@
     <string name="select_area">Select Area</string>
     <string name="categories">Categories</string>
     <string name="foodie_s_special">FOODIE\'S SPECIAL</string>
+    <string name="chicken_recipies">Chicken Recipies</string>
+    <string name="watch_video">WATCH VIDEO</string>
+    <string name="drinks">Drinks</string>
+    <string name="description">Description</string>
 
     <string-array name="area_list">
         <item>Indian</item>

@@ -48,12 +48,12 @@
             android:padding="8dp"
             app:cardUseCompatPadding="true">
             <Button
-                android:id="@+id/imageButton"
+                android:id="@+id/video_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#E53935"
                 android:fontFamily="serif"
-                android:text="WATCH ON YOUTUBE"
+                android:text="@string/watch_video"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
         </androidx.cardview.widget.CardView>

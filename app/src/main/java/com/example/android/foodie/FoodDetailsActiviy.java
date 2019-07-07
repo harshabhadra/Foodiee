@@ -25,12 +25,16 @@ public class FoodDetailsActiviy extends AppCompatActivity {
     int id;
     BookMarkViewModel bookMarkViewModel;
     FoodViewModel foodViewModel;
+
     BookMark bookMark;
-    Button imageButton;
+
+    Button videoButton;
     TextView textView;
     String videoUrl;
     String name;
     String imgUrl;
+    String details;
+
     private int CONSTANT = 0;
 
     @Override
@@ -39,8 +43,15 @@ public class FoodDetailsActiviy extends AppCompatActivity {
         setContentView(R.layout.activity_food_details_activiy);
 
         imageView = findViewById(R.id.imageView);
-        imageButton = findViewById(R.id.imageButton);
         textView = findViewById(R.id.how_to);
+        videoButton = findViewById(R.id.video_button);
+        videoButton.setEnabled(false);
+        videoButton.setVisibility(View.GONE);
+
+        //Initializing bookmark view model
+        bookMarkViewModel = ViewModelProviders.of(this).get(BookMarkViewModel.class);
+        //Initializing foodViewModel and getting details of a particular food item
+        foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
 
         //Getting values of item from the Intent as per activity
         Intent intent = getIntent();
@@ -70,38 +81,55 @@ public class FoodDetailsActiviy extends AppCompatActivity {
             name = foodCategory.getFoodName();
 
             setTitle(name);
+        }else if (intent.hasExtra("drinkId")){
+            CONSTANT++;
+            FoodCategory foodCategory = intent.getParcelableExtra("drinkId");
+            id = foodCategory.getFoodId();
+            name = foodCategory.getFoodName();
+
+            foodViewModel.getDrinkDetails(id).observe(this, new Observer<FoodCategory>() {
+                @Override
+                public void onChanged(FoodCategory foodCategory) {
+                    if (foodCategory != null) {
+                        Picasso.get().load(foodCategory.getFoodImage())
+                                .resize(4000, 6000)
+                                .onlyScaleDown()
+                                .centerInside()
+                                .into(imageView);
+                        textView.setText(foodCategory.getCookingDetails());
+                    }else {
+                        Toast.makeText(getApplicationContext(), "Empty Drink", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
-
-        //Initializing bookmark view model
-        bookMarkViewModel = ViewModelProviders.of(this).get(BookMarkViewModel.class);
-
-        //Initializing foodViewModel and getting details of a particular food item
-        foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
 
         foodViewModel.getFoodDetails(id).observe(this, new Observer<FoodCategory>() {
             @Override
             public void onChanged(FoodCategory foodCategory) {
-                textView.setText(foodCategory.getCookingDetails());
+
+                details = foodCategory.getCookingDetails();
+                textView.setText(details);
                 videoUrl = foodCategory.getVideoUrl();
+                Toast.makeText(getApplicationContext(),videoUrl,Toast.LENGTH_SHORT).show();
                 imgUrl = foodCategory.getFoodImage();
                 Picasso.get().load(imgUrl).placeholder(R.mipmap.icon).into(imageView);
+                videoButton.setEnabled(true);
+                videoButton.setVisibility(View.VISIBLE);
             }
         });
 
-        //Sending the videoUrl via intent and start youtube
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        videoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Uri url = Uri.parse(videoUrl);
-                Intent youtube = new Intent(Intent.ACTION_VIEW, url);
-                try {
-                    FoodDetailsActiviy.this.startActivity(youtube);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                }
+                Intent videoIntent = new Intent(FoodDetailsActiviy.this, YoutubeVideoActivity.class);
+                videoIntent.putExtra("name", name);
+                videoIntent.putExtra("url",videoUrl);
+                videoIntent.putExtra("details",details);
+                startActivity(videoIntent);
             }
         });
+
 
     }
 

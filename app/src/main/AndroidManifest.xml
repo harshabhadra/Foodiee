@@ -16,10 +16,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".BookMarkActivity"
+        <activity android:name=".YoutubeVideoActivity"
+            android:parentActivityName=".FoodDetailsActiviy">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value=".FoodDetailsActiviy"/>
+        </activity>
+        <activity
+            android:name=".BookMarkActivity"
             android:label="Bookmarks"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="sensorPortrait">
+            android:screenOrientation="portrait">
         </activity>
         <activity android:name=".FoodDetailsActiviy">
         </activity>

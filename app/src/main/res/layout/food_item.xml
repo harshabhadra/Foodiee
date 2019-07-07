@@ -15,7 +15,7 @@
 
         <ImageView
             android:id="@+id/iv_food_image"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             tools:src="@drawable/ic_launcher_background" />
@@ -24,10 +24,11 @@
             android:id="@+id/tv_food_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/iv_food_image"
             android:layout_gravity="center"
-            android:fontFamily="sans-serif-condensed-light"
+            android:background="#8000"
+            android:fontFamily="casual"
             android:padding="8dp"
-            android:background="#EF5350"
             android:textColor="#FFFFFF"
             android:textSize="22sp"
             android:textStyle="bold"

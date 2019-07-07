@@ -42,13 +42,16 @@ public class RandomAdapter extends RecyclerView.Adapter<RandomAdapter.RandomView
     @Override
     public void onBindViewHolder(@NonNull RandomViewHolder holder, int position) {
 
-        Picasso.get().load(randomList.get(position).getFoodImage())
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_background)
-                .resize(300,400)
-                .centerCrop()
-                .into(holder.imageView);
-        holder.textView.setText(randomList.get(position).getFoodName());
+        if (randomList != null) {
+            Picasso.get().load(randomList.get(position).getFoodImage())
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_background)
+                    .resize(3000, 4000)
+                    .onlyScaleDown()
+                    .centerCrop()
+                    .into(holder.imageView);
+            holder.textView.setText(randomList.get(position).getFoodName());
+        }
     }
 
     @Override

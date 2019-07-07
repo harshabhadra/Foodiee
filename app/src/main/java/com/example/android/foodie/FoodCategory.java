@@ -24,6 +24,11 @@ public class FoodCategory implements Parcelable {
     private String cookingDetails;
     private String videoUrl;
 
+    public FoodCategory(String foodImage, String cookingDetails) {
+        this.foodImage = foodImage;
+        this.cookingDetails = cookingDetails;
+    }
+
     public FoodCategory(String foodName, String foodImage, int foodId) {
         this.foodName = foodName;
         this.foodImage = foodImage;

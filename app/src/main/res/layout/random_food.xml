@@ -24,10 +24,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:fontFamily="sans-serif-condensed-light"
+            android:fontFamily="casual"
             android:padding="8dp"
-            android:background="#EF5350"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textSize="22sp"
             android:textStyle="bold"
             tools:text="Food Name" />

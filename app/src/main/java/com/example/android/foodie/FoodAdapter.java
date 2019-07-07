@@ -40,8 +40,9 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
         Picasso.get().load(foodList.get(position).getImageUrl())
                 .placeholder(R.drawable.ic_search)
-                .resize(300,400)
-                .centerCrop()
+                .resize(3000,4000)
+                .onlyScaleDown()
+                .centerInside()
                 .into(holder.foodImage);
         holder.foodName.setText(foodList.get(position).getFoodName());
     }

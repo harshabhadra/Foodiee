@@ -8,6 +8,8 @@ public interface Api {
 
     String JsonUrl = "https://www.themealdb.com/";
 
+    String drinkUrl = "https://www.thecocktaildb.com/";
+
     //Get food by area
     @GET("/api/json/v1/1/filter.php?")
     Call<String> getResponse(@Query("a")String area);
@@ -27,4 +29,12 @@ public interface Api {
     //Get detail about a food
     @GET("/api/json/v1/1/lookup.php?")
     Call<String>getDetails(@Query("i")int id);
+
+    //Get ordinary drinks
+    @GET("/api/json/v1/1/filter.php?c=Ordinary_Drink")
+    Call<String>getChickenItems();
+
+    //Get drinks details by id
+    @GET("/api/json/v1/1/lookup.php?")
+    Call<String>getDrinkDetails(@Query("i") int id);
 }

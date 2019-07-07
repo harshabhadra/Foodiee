@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/cardview_shadow_end_color"
     tools:context=".MainActivity"
     tools:ignore="PrivateResource"
@@ -25,59 +25,9 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            tools:text="TextView"
-            android:visibility="gone" />
         <include layout="@layout/foodie_special"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/fab_margin"
-            android:layout_marginBottom="@dimen/fab_margin">
-            <TextView
-                android:id="@+id/heading2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:fontFamily="sans-serif-condensed-light"
-                android:text="@string/select_area"
-                android:visibility="invisible"
-                android:textColor="#000000"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-            <Spinner
-                android:id="@+id/area_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:gravity="end">
-            </Spinner>
-        </LinearLayout>
+        <include layout="@layout/categories_chicken"/>
         <include layout="@layout/area_recycler"/>
-        <TextView
-            android:id="@+id/heading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="sans-serif-condensed-light"
-            android:text="@string/categories"
-            android:textColor="#000000"
-            android:visibility="invisible"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
+
     </LinearLayout>
 </ScrollView>

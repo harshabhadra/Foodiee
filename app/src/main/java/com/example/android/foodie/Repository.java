@@ -37,6 +37,12 @@ public class Repository {
     //Store details of a random food
     private MutableLiveData<FoodCategory> random = new MutableLiveData<>();
 
+    //Store Chicken items data
+    private MutableLiveData<List<FoodCategory>>chickenData = new MutableLiveData<>();
+
+    //Store drink details
+    private MutableLiveData<FoodCategory>drinkDetails = new MutableLiveData<>();
+
     private FoodDao foodDao;
 
     private LiveData<List<BookMark>> liveData;
@@ -79,7 +85,7 @@ public class Repository {
     }
 
     //Method to get list of food categories
-    public LiveData<List<Food>> getListCategories() {
+    LiveData<List<Food>> getListCategories() {
 
         if (listOfCategories == null) {
             listOfCategories = new MutableLiveData<>();
@@ -91,28 +97,82 @@ public class Repository {
     }
 
     //Get list of foods by area
-    public LiveData<List<FoodCategory>> getFoodByArea(String area) {
+    LiveData<List<FoodCategory>> getFoodByArea(String area) {
 
         loadFoodByArea(area);
         return foodByArea;
     }
 
     //Get a random meal
-    public LiveData<FoodCategory> getRandom() {
+    LiveData<FoodCategory> getRandom() {
         loadRandom();
         return random;
     }
 
     //Get details about a food item
-    public LiveData<FoodCategory> getFoodDetails(int id) {
+    LiveData<FoodCategory> getFoodDetails(int id) {
         loadDetails(id);
         return detailsData;
     }
 
+    //Get details of a drink
+    LiveData<FoodCategory>getDrinkDetails(int id){
+        loadDrinkDetails(id);
+        return  drinkDetails;
+    }
+
     //Get list of foods by category
-    public LiveData<List<FoodCategory>> getFoodCatergory(String category) {
+    LiveData<List<FoodCategory>> getFoodCatergory(String category) {
         loadFoodByCategory(category);
         return categoryData;
+    }
+
+    LiveData<List<FoodCategory>>getChickenItem(){
+        loadChickenItem();
+        return chickenData;
+    }
+
+    //Network call to get chicken items
+    private void loadChickenItem(){
+        final List<FoodCategory>chickenList = new ArrayList<>();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Api.drinkUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        Api api = retrofit.create(Api.class);
+        Call<String>call = api.getChickenItems();
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.body()!= null){
+                    String json = response.body();
+                    try {
+                        JSONObject jsonObject = new JSONObject(json);
+                        JSONArray jsonArray = jsonObject.getJSONArray("drinks");
+
+                        for (int i =0; i<jsonArray.length(); i++){
+                            JSONObject chickenObj = jsonArray.getJSONObject(i);
+                            String name = chickenObj.getString("strDrink");
+                            String imgUrl = chickenObj.getString("strDrinkThumb");
+                            int id = chickenObj.getInt("idDrink");
+
+                            FoodCategory foodCategory = new FoodCategory(name,imgUrl,id);
+                            chickenList.add(foodCategory);
+                            chickenData.setValue(chickenList);
+                        }
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
+
     }
 
     //Network call to get list of food by area
@@ -184,6 +244,46 @@ public class Repository {
                             Log.e("Repository", "Food Name: " + name);
                             FoodCategory foodCategory = new FoodCategory(name, image, id);
                             random.setValue(foodCategory);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
+    }
+
+    //Network call to get drink's details
+    private void loadDrinkDetails(int id){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Api.drinkUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+
+        Api api = retrofit.create(Api.class);
+        Call<String>call = api.getDrinkDetails(id);
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.body() != null){
+                    String json = response.body();
+                    try {
+                        JSONObject jsonObject = new JSONObject(json);
+                        JSONArray jsonArray = jsonObject.getJSONArray("drinks");
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+
+                            JSONObject object = jsonArray.getJSONObject(i);
+                            String details = object.getString("strInstructions");
+                            String image = object.getString("strDrinkThumb");
+
+                            FoodCategory dDetails = new FoodCategory(image,details);
+                            drinkDetails.setValue(dDetails);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
