@@ -3,6 +3,8 @@ package com.example.android.foodie;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -30,16 +33,16 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodItemClickListener,
-        RandomAdapter.AreaItemClickListener,
-        AdapterView.OnItemSelectedListener, ChickenAdapter.OnChickenItemClickListener {
+        FoodByAreaAdapter.AreaItemClickListener,
+        AdapterView.OnItemSelectedListener, OrdinaryDrinkAdapter.OnDrinkItemClickListener {
 
     RecyclerView recyclerView;
     RecyclerView areaRecycler;
     RecyclerView chickenRecycler;
 
-    RandomAdapter randomAdapter;
+    FoodByAreaAdapter foodByAreaAdapter;
     FoodAdapter foodAdapter;
-    ChickenAdapter chickenAdapter;
+    OrdinaryDrinkAdapter ordinaryDrinkAdapter;
 
     ProgressBar progressBar;
 
@@ -47,16 +50,20 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
 
     TextView heading;
     TextView heading2;
-    TextView chicken;
+    TextView drink;
     TextView randomFood;
     ImageView randomImage;
     CardView randomCard;
+    LinearLayout noIntenet;
 
     int randomId;
     String area = "";
     String name;
     Spinner areaSpinner;
     ProgressBar areaLoading;
+
+    ConnectivityManager manager;
+    NetworkInfo networkInfo;
 
 
     @Override
@@ -75,16 +82,18 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
 
         areaLoading = findViewById(R.id.area_loading);
         progressBar = findViewById(R.id.progressBar);
+        noIntenet = findViewById(R.id.no_internet);
 
         progressBar.setVisibility(View.VISIBLE);
 
         heading = findViewById(R.id.heading);
         heading2 = findViewById(R.id.heading2);
-        chicken = findViewById(R.id.chicken);
+        drink = findViewById(R.id.chicken);
 
         randomImage = findViewById(R.id.random_img);
         randomFood = findViewById(R.id.random_food);
         randomCard = findViewById(R.id.random_card);
+
 
         //Open FoodDetailsActivity when use click on Foodie's special card
         randomCard.setOnClickListener(new View.OnClickListener() {
@@ -97,72 +106,81 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
             }
         });
 
-        //Initializing category recyclerView
+        //Initializing category bookMarkRecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 
-        //Initializing area recyclerView
+        //Initializing area bookMarkRecyclerView
         areaRecycler = findViewById(R.id.random_recycler);
         areaRecycler.setHasFixedSize(true);
         areaRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 
-        //Initializing Chicken recyclerView and getting chicken item list
+        //Initializing Chicken bookMarkRecyclerView and getting drink item list
         chickenRecycler = findViewById(R.id.chicken_recycler);
         chickenRecycler.setHasFixedSize(true);
         chickenRecycler.setLayoutManager(new LinearLayoutManager(MainActivity.this, RecyclerView.HORIZONTAL, false));
 
+        //Checking the Network state of the device
+        manager = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = manager.getActiveNetworkInfo();
 
-        //Initializing foodViewModel and getting list of food categories
-        foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
-        foodViewModel.getFoodList().observe(MainActivity.this, new Observer<List<Food>>() {
-            @Override
-            public void onChanged(List<Food> foods) {
-                if (foods.size() != 0) {
-                    progressBar.setVisibility(View.GONE);
-                    heading.setVisibility(View.VISIBLE);
-                    foodAdapter = new FoodAdapter(MainActivity.this, MainActivity.this, foods);
-                    recyclerView.setAdapter(foodAdapter);
-                } else {
-                    Log.d("MainActivity", "Failed to fetch data");
-                    Toast.makeText(MainActivity.this, "Failed to fetch data", Toast.LENGTH_LONG).show();
-                }
-            }
-
-        });
-
-        //Getting a food item randomly
-        foodViewModel.getRandom().observe(this, new Observer<FoodCategory>() {
-            @Override
-            public void onChanged(FoodCategory foodCategory) {
-                if (foodCategory != null) {
-                    Picasso.get().load(foodCategory.getFoodImage())
-                            .placeholder(R.drawable.ic_launcher_foreground)
-                            .error(R.drawable.ic_launcher_background)
-                            .resize(4000, 6000)
-                            .onlyScaleDown()
-                            .centerInside()
-                            .into(randomImage);
-                    name = foodCategory.getFoodName();
-                    randomId = foodCategory.getFoodId();
-                    randomFood.setText(name);
-                    randomCard.setVisibility(View.VISIBLE);
+        if (networkInfo != null && networkInfo.isConnected()) {
+            //Initialize viewModel
+            foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
+            //Getting list of categories of foods
+            foodViewModel.getFoodList().observe(MainActivity.this, new Observer<List<Food>>() {
+                @Override
+                public void onChanged(List<Food> foods) {
+                    if (foods.size() != 0) {
+                        progressBar.setVisibility(View.GONE);
+                        heading.setVisibility(View.VISIBLE);
+                        foodAdapter = new FoodAdapter(MainActivity.this, MainActivity.this, foods);
+                        recyclerView.setAdapter(foodAdapter);
+                    } else {
+                        Log.d("MainActivity", "Failed to fetch data");
+                        Toast.makeText(MainActivity.this, "Failed to fetch data", Toast.LENGTH_LONG).show();
+                    }
                 }
 
-            }
-        });
+            });
+            //Getting a food item randomly
+            foodViewModel.getRandom().observe(this, new Observer<FoodCategory>() {
+                @Override
+                public void onChanged(FoodCategory foodCategory) {
+                    if (foodCategory != null) {
+                        Picasso.get().load(foodCategory.getFoodImage())
+                                .placeholder(R.drawable.ic_launcher_foreground)
+                                .error(R.drawable.ic_launcher_background)
+                                .resize(4000, 6000)
+                                .onlyScaleDown()
+                                .centerInside()
+                                .into(randomImage);
+                        name = foodCategory.getFoodName();
+                        randomId = foodCategory.getFoodId();
+                        randomFood.setText(name);
+                        randomCard.setVisibility(View.VISIBLE);
+                    }
 
-        //Getting chicken items list
-        foodViewModel.getChickenItems().observe(this, new Observer<List<FoodCategory>>() {
-            @Override
-            public void onChanged(List<FoodCategory> foodCategoryList) {
-                if (foodCategoryList != null) {
-                    chicken.setVisibility(View.VISIBLE);
-                     chickenAdapter = new ChickenAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
-                    chickenRecycler.setAdapter(chickenAdapter);
                 }
-            }
-        });
+            });
+            //Getting drinks List
+            foodViewModel.getOrdinaryDrinkItems().observe(this, new Observer<List<FoodCategory>>() {
+                @Override
+                public void onChanged(List<FoodCategory> foodCategoryList) {
+                    if (foodCategoryList != null) {
+                        drink.setVisibility(View.VISIBLE);
+                        ordinaryDrinkAdapter = new OrdinaryDrinkAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
+                        chickenRecycler.setAdapter(ordinaryDrinkAdapter);
+                    }
+                }
+            });
+
+        } else {
+            progressBar.setVisibility(View.GONE);
+            noIntenet.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -209,17 +227,16 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
 
         //Starting FoodDetailsActivity when user click on any item from areaRecycler
         Intent detailIntent = new Intent(MainActivity.this, FoodDetailsActiviy.class);
-        detailIntent.putExtra("areaId", randomAdapter.getAreaFood(position));
+        detailIntent.putExtra("areaId", foodByAreaAdapter.getAreaFood(position));
         startActivity(detailIntent);
     }
 
     @Override
     public void onChickenItemClick(int position) {
 
-
-
+        //Start FoodDetailsActivity when user click on any ordinary drinks
         Intent intent = new Intent(MainActivity.this, FoodDetailsActiviy.class);
-        intent.putExtra("drinkId", chickenAdapter.getDrink(position));
+        intent.putExtra("drinkId", ordinaryDrinkAdapter.getDrink(position));
         startActivity(intent);
 
     }
@@ -230,21 +247,24 @@ public class MainActivity extends AppCompatActivity implements FoodAdapter.FoodI
         //Set the value of area as per item selected in spinner
         area = parent.getItemAtPosition(position).toString();
 
-        //Getting list of food item as per area
-        foodViewModel.getFoodByArea(area).observe(this, new Observer<List<FoodCategory>>() {
-            @Override
-            public void onChanged(List<FoodCategory> foodCategoryList) {
-                if (foodCategoryList != null) {
-                    heading2.setVisibility(View.VISIBLE);
-                    areaSpinner.setVisibility(View.VISIBLE);
-                    areaLoading.setVisibility(View.GONE);
-                    randomAdapter = new RandomAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
-                    areaRecycler.setAdapter(randomAdapter);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Empty List", Toast.LENGTH_SHORT).show();
+        if (networkInfo!= null && networkInfo.isConnected()) {
+
+            //Getting list of food item as per area
+            foodViewModel.getFoodByArea(area).observe(this, new Observer<List<FoodCategory>>() {
+                @Override
+                public void onChanged(List<FoodCategory> foodCategoryList) {
+                    if (foodCategoryList != null) {
+                        heading2.setVisibility(View.VISIBLE);
+                        areaSpinner.setVisibility(View.VISIBLE);
+                        areaLoading.setVisibility(View.GONE);
+                        foodByAreaAdapter = new FoodByAreaAdapter(MainActivity.this, MainActivity.this, foodCategoryList);
+                        areaRecycler.setAdapter(foodByAreaAdapter);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Empty List", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

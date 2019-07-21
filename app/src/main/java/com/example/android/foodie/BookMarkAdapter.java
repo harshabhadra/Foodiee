@@ -62,6 +62,12 @@ public class BookMarkAdapter extends RecyclerView.Adapter<BookMarkAdapter.BookMa
         }
     }
 
+    public void removeItem(int position){
+        bookMarkList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position,bookMarkList.size());
+    }
+
     void setBookMarkList(List<BookMark> bookMarkList) {
         this.bookMarkList = bookMarkList;
         notifyDataSetChanged();

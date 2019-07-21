@@ -15,64 +15,64 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChickenAdapter extends RecyclerView.Adapter<ChickenAdapter.ChickenViewHolder> {
+public class OrdinaryDrinkAdapter extends RecyclerView.Adapter<OrdinaryDrinkAdapter.DrinkViewHolder> {
 
     LayoutInflater inflater;
-    List<FoodCategory> chickenItemList = new ArrayList<>();
-    OnChickenItemClickListener chickenItemClickListener;
+    List<FoodCategory> ordinaryDrinkList = new ArrayList<>();
+    OnDrinkItemClickListener drinkItemClickListener;
     int id;
 
-    public interface OnChickenItemClickListener{
+    public interface OnDrinkItemClickListener {
         void onChickenItemClick(int position);
     }
 
-    public ChickenAdapter(Context context,OnChickenItemClickListener listener, List<FoodCategory> chickenItemList) {
+    public OrdinaryDrinkAdapter(Context context, OnDrinkItemClickListener listener, List<FoodCategory> ordinaryDrinkList) {
         inflater = LayoutInflater.from(context);
-        chickenItemClickListener = listener;
-        this.chickenItemList = chickenItemList;
+        drinkItemClickListener = listener;
+        this.ordinaryDrinkList = ordinaryDrinkList;
     }
 
     @NonNull
     @Override
-    public ChickenViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public DrinkViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view = inflater.inflate(R.layout.chicken_item, parent, false);
-        return new ChickenViewHolder(view);
+        View view = inflater.inflate(R.layout.ordinary_drink_item, parent, false);
+        return new DrinkViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ChickenViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull DrinkViewHolder holder, int position) {
 
-        Picasso.get().load(chickenItemList.get(position).getFoodImage())
+        Picasso.get().load(ordinaryDrinkList.get(position).getFoodImage())
                 .placeholder(R.mipmap.icon)
                 .resize(4000,6000)
                 .onlyScaleDown()
                 .centerCrop()
                 .into(holder.imageView);
-        holder.textView.setText(chickenItemList.get(position).getFoodName());
-        id = chickenItemList.get(position).getFoodId();
+        holder.textView.setText(ordinaryDrinkList.get(position).getFoodName());
+        id = ordinaryDrinkList.get(position).getFoodId();
     }
 
     @Override
     public int getItemCount() {
-        return chickenItemList.size();
+        return ordinaryDrinkList.size();
     }
 
     public FoodCategory getDrink(int position){
 
-        if (chickenItemList != null){
-            return chickenItemList.get(position);
+        if (ordinaryDrinkList != null){
+            return ordinaryDrinkList.get(position);
         }
         else {
         return null;}
     }
 
-    public class ChickenViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class DrinkViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         ImageView imageView;
         TextView textView;
 
-        public ChickenViewHolder(@NonNull View itemView) {
+        public DrinkViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.chicken_image);
@@ -83,7 +83,7 @@ public class ChickenAdapter extends RecyclerView.Adapter<ChickenAdapter.ChickenV
         @Override
         public void onClick(View v) {
             int position = getAdapterPosition();
-            chickenItemClickListener.onChickenItemClick(position);
+            drinkItemClickListener.onChickenItemClick(position);
         }
     }
 }

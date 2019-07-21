@@ -39,12 +39,17 @@ public class FoodViewModel extends ViewModel {
     }
 
     //Get Chicken items list
-    LiveData<List<FoodCategory>>getChickenItems(){
-        return repository.getChickenItem();
+    LiveData<List<FoodCategory>> getOrdinaryDrinkItems(){
+        return repository.getDrinkListItem();
     }
 
     //Get details about a single drink
     LiveData<FoodCategory>getDrinkDetails(int id){
         return repository.getDrinkDetails(id);
+    }
+
+    //Get cocktails drinks list
+    LiveData<List<FoodCategory>>getCockTailsList(){
+        return repository.getCocktailsList();
     }
 }

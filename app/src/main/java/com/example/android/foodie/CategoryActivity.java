@@ -1,10 +1,15 @@
 package com.example.android.foodie;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -20,11 +25,14 @@ import java.util.List;
 public class CategoryActivity extends AppCompatActivity implements CategoryAdapter.ItemClickListener {
 
 
-    RecyclerView recyclerView;
+    StatefulRecyclerView recyclerView;
     ProgressBar progressBar;
     CategoryAdapter categoryAdapter;
     String TAG = "MainActivity";
     FoodViewModel foodViewModel;
+
+    ImageView noInternetImage;
+    TextView noInternetText;
 
 
     @Override
@@ -33,12 +41,18 @@ public class CategoryActivity extends AppCompatActivity implements CategoryAdapt
         setContentView(R.layout.activity_category);
         Log.d(TAG, "onCreate");
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         progressBar = findViewById(R.id.loading);
 
-        //Initializing recyclerView
+        noInternetImage = findViewById(R.id.no_internet_category);
+        noInternetText = findViewById(R.id.no_internet_category_tv);
+
+        //Initializing bookMarkRecyclerView
         recyclerView = findViewById(R.id.category_recycler);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new GridLayoutManager(this,2));
 
         //Getting category name from the intent
         Intent intent = getIntent();
@@ -49,23 +63,33 @@ public class CategoryActivity extends AppCompatActivity implements CategoryAdapt
 
         //set title of the activity
         setTitle(category);
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        //Initializing foodViewModel and getting list of food item as per category
-        foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
-        foodViewModel.getFoodCategory(category).observe(this, new Observer<List<FoodCategory>>() {
-            @Override
-            public void onChanged(List<FoodCategory> foodCategories) {
-                if (!foodCategories.isEmpty()) {
-                    progressBar.setVisibility(View.GONE);
-                    categoryAdapter = new CategoryAdapter(CategoryActivity.this, foodCategories, CategoryActivity.this);
-                    recyclerView.setAdapter(categoryAdapter);
+        if (networkInfo!= null && networkInfo.isConnected()) {
 
-                    Log.e(TAG, "Category Name: " + category);
-                } else {
-                    Toast.makeText(CategoryActivity.this, "empty list", Toast.LENGTH_SHORT).show();
+            //Initializing foodViewModel and getting list of food item as per category
+            foodViewModel = ViewModelProviders.of(this).get(FoodViewModel.class);
+            foodViewModel.getFoodCategory(category).observe(this, new Observer<List<FoodCategory>>() {
+                @Override
+                public void onChanged(List<FoodCategory> foodCategories) {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    if (!foodCategories.isEmpty()) {
+                        progressBar.setVisibility(View.GONE);
+                        categoryAdapter = new CategoryAdapter(CategoryActivity.this, foodCategories, CategoryActivity.this);
+                        recyclerView.setAdapter(categoryAdapter);
+
+                        Log.e(TAG, "Category Name: " + category);
+                    } else {
+                        Toast.makeText(CategoryActivity.this, "empty list", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }else {
+            progressBar.setVisibility(View.GONE);
+            noInternetText.setVisibility(View.VISIBLE);
+            noInternetImage.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

@@ -1,22 +1,30 @@
 package com.example.android.foodie;
 
-import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.squareup.picasso.Picasso;
 
 public class FoodDetailsActiviy extends AppCompatActivity {
@@ -25,16 +33,23 @@ public class FoodDetailsActiviy extends AppCompatActivity {
     int id;
     BookMarkViewModel bookMarkViewModel;
     FoodViewModel foodViewModel;
+    CardView youTubeCard;
+    LinearLayout mainContent;
+    ProgressBar loadingDetails;
+    LinearLayout noInternetLayout;
 
     BookMark bookMark;
-
-    Button videoButton;
     TextView textView;
     String videoUrl;
     String name;
     String imgUrl;
     String details;
+    String videoCode;
 
+    ConnectivityManager connectivityManager;
+    NetworkInfo networkInfo;
+    YouTubePlayerSupportFragment fragment;
+    YouTubePlayer player;
     private int CONSTANT = 0;
 
     @Override
@@ -42,11 +57,21 @@ public class FoodDetailsActiviy extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_details_activiy);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         imageView = findViewById(R.id.imageView);
         textView = findViewById(R.id.how_to);
-        videoButton = findViewById(R.id.video_button);
-        videoButton.setEnabled(false);
-        videoButton.setVisibility(View.GONE);
+        youTubeCard = findViewById(R.id.youtube_card);
+        mainContent = findViewById(R.id.main_content);
+        loadingDetails = findViewById(R.id.loading_details);
+        noInternetLayout = findViewById(R.id.no_internet_food_details);
+
+        //Checking the Network state of the Device
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        fragment = (YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(R.id.youtube_player_fragment);
 
         //Initializing bookmark view model
         bookMarkViewModel = ViewModelProviders.of(this).get(BookMarkViewModel.class);
@@ -68,76 +93,98 @@ public class FoodDetailsActiviy extends AppCompatActivity {
             name = bookMark.getName();
 
             setTitle(name);
-        }else if (intent.hasExtra("randomId")){
+        } else if (intent.hasExtra("randomId")) {
             CONSTANT++;
-            id = intent.getIntExtra("randomId",0);
+            id = intent.getIntExtra("randomId", 0);
             name = intent.getStringExtra("name");
 
             setTitle(name);
-        }else if (intent.hasExtra("areaId")){
+        } else if (intent.hasExtra("areaId")) {
             CONSTANT++;
             FoodCategory foodCategory = intent.getParcelableExtra("areaId");
             id = foodCategory.getFoodId();
             name = foodCategory.getFoodName();
 
             setTitle(name);
-        }else if (intent.hasExtra("drinkId")){
+        } else if (intent.hasExtra("drinkId")) {
             CONSTANT++;
             FoodCategory foodCategory = intent.getParcelableExtra("drinkId");
             id = foodCategory.getFoodId();
             name = foodCategory.getFoodName();
+            youTubeCard.setVisibility(View.GONE);
 
-            foodViewModel.getDrinkDetails(id).observe(this, new Observer<FoodCategory>() {
-                @Override
-                public void onChanged(FoodCategory foodCategory) {
-                    if (foodCategory != null) {
-                        Picasso.get().load(foodCategory.getFoodImage())
-                                .resize(4000, 6000)
-                                .onlyScaleDown()
-                                .centerInside()
-                                .into(imageView);
-                        textView.setText(foodCategory.getCookingDetails());
-                    }else {
-                        Toast.makeText(getApplicationContext(), "Empty Drink", Toast.LENGTH_SHORT).show();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                foodViewModel.getDrinkDetails(id).observe(this, new Observer<FoodCategory>() {
+                    @Override
+                    public void onChanged(FoodCategory foodCategory) {
+                        mainContent.setVisibility(View.VISIBLE);
+                        loadingDetails.setVisibility(View.GONE);
+                        if (foodCategory != null) {
+                            Picasso.get().load(foodCategory.getFoodImage())
+                                    .resize(4000, 6000)
+                                    .onlyScaleDown()
+                                    .centerInside()
+                                    .into(imageView);
+                            textView.setText(foodCategory.getCookingDetails());
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Empty Drink", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                loadingDetails.setVisibility(View.GONE);
+                noInternetLayout.setVisibility(View.VISIBLE);
+            }
         }
 
-        foodViewModel.getFoodDetails(id).observe(this, new Observer<FoodCategory>() {
-            @Override
-            public void onChanged(FoodCategory foodCategory) {
+        if (networkInfo != null && networkInfo.isConnected()) {
+            foodViewModel.getFoodDetails(id).observe(this, new Observer<FoodCategory>() {
+                @Override
+                public void onChanged(FoodCategory foodCategory) {
 
-                details = foodCategory.getCookingDetails();
-                textView.setText(details);
-                videoUrl = foodCategory.getVideoUrl();
-                Toast.makeText(getApplicationContext(),videoUrl,Toast.LENGTH_SHORT).show();
-                imgUrl = foodCategory.getFoodImage();
-                Picasso.get().load(imgUrl).placeholder(R.mipmap.icon).into(imageView);
-                videoButton.setEnabled(true);
-                videoButton.setVisibility(View.VISIBLE);
-            }
-        });
+                    mainContent.setVisibility(View.VISIBLE);
+                    loadingDetails.setVisibility(View.GONE);
+                    details = foodCategory.getCookingDetails();
+                    textView.setText(details);
+                    videoUrl = foodCategory.getVideoUrl();
+                    String[] seperator = videoUrl.split("=");
+                    String url = seperator[0];
+                    videoCode = seperator[1];
 
-        videoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent videoIntent = new Intent(FoodDetailsActiviy.this, YoutubeVideoActivity.class);
-                videoIntent.putExtra("name", name);
-                videoIntent.putExtra("url",videoUrl);
-                videoIntent.putExtra("details",details);
-                startActivity(videoIntent);
-            }
-        });
+                    youTubeCard.setVisibility(View.VISIBLE);
+                    imgUrl = foodCategory.getFoodImage();
+                    Picasso.get().load(imgUrl).placeholder(R.mipmap.icon)
+                            .fit()
+                            .centerCrop()
+                            .into(imageView);
+                    fragment.initialize(Config.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
+                        @Override
+                        public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+                            if (!b) {
+                                player = youTubePlayer;
+                                player.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                                player.loadVideo(videoCode);
+                            }
+                        }
 
+                        @Override
+                        public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
 
+                        }
+                    });
+                }
+            });
+        } else {
+            loadingDetails.setVisibility(View.GONE);
+            noInternetLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_details, menu);
-        if (CONSTANT == 0){
+        if (CONSTANT == 0) {
             menu.findItem(R.id.bookmark).setVisible(false);
         }
         return true;
@@ -161,13 +208,21 @@ public class FoodDetailsActiviy extends AppCompatActivity {
         if (id1 == R.id.share_details) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "How to Cook " + name + "\n"+ videoUrl);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "How to Cook " + name + "\n" + videoUrl);
             sendIntent.setType("text/plain");
-            startActivity(Intent.createChooser(sendIntent,"Share With"));
+            startActivity(Intent.createChooser(sendIntent, "Share With"));
             return true;
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    public class loadVideoAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
     }
 
     public class MyUndoListener implements View.OnClickListener {

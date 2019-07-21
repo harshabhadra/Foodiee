@@ -3,6 +3,7 @@ package com.example.android.foodie;
 import android.app.Application;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -38,10 +39,13 @@ public class Repository {
     private MutableLiveData<FoodCategory> random = new MutableLiveData<>();
 
     //Store Chicken items data
-    private MutableLiveData<List<FoodCategory>>chickenData = new MutableLiveData<>();
+    private MutableLiveData<List<FoodCategory>> ordinaryDrinkListDATA = new MutableLiveData<>();
 
     //Store drink details
     private MutableLiveData<FoodCategory>drinkDetails = new MutableLiveData<>();
+
+    //Store cocktail drinks list
+    private MutableLiveData<List<FoodCategory>>cocktailDrinksList = new MutableLiveData<>();
 
     private FoodDao foodDao;
 
@@ -127,20 +131,31 @@ public class Repository {
         return categoryData;
     }
 
-    LiveData<List<FoodCategory>>getChickenItem(){
-        loadChickenItem();
-        return chickenData;
+    //Get list of ordinary drinks
+    LiveData<List<FoodCategory>> getDrinkListItem(){
+        loadDrinksListItem();
+        return ordinaryDrinkListDATA;
     }
 
-    //Network call to get chicken items
-    private void loadChickenItem(){
-        final List<FoodCategory>chickenList = new ArrayList<>();
+    //Get list of cocktail drinks
+    LiveData<List<FoodCategory>>getCocktailsList(){
+        loadCocktailDrinks();
+        return  cocktailDrinksList;
+    }
+
+
+    //Network call to get cocktails drinks list
+    private void loadCocktailDrinks(){
+
+        final List<FoodCategory>cocktailList = new ArrayList<>();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Api.drinkUrl)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
+
         Api api = retrofit.create(Api.class);
-        Call<String>call = api.getChickenItems();
+        Call<String>call = api.getCockTails();
 
         call.enqueue(new Callback<String>() {
             @Override
@@ -158,12 +173,58 @@ public class Repository {
                             int id = chickenObj.getInt("idDrink");
 
                             FoodCategory foodCategory = new FoodCategory(name,imgUrl,id);
-                            chickenList.add(foodCategory);
-                            chickenData.setValue(chickenList);
+                            cocktailList.add(foodCategory);
+                            cocktailDrinksList.setValue(cocktailList);
                         }
                     }catch (JSONException e){
                         e.printStackTrace();
                     }
+                }else {
+                    Log.e("Repository","empty drink list");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
+    }
+
+    //Network call to get drink items
+    private void loadDrinksListItem(){
+        final List<FoodCategory>oridinaryDrinkList = new ArrayList<>();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Api.drinkUrl)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .build();
+        Api api = retrofit.create(Api.class);
+        Call<String>call = api.getOrdinaryDrinks();
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.body()!= null){
+                    String json = response.body();
+                    try {
+                        JSONObject jsonObject = new JSONObject(json);
+                        JSONArray jsonArray = jsonObject.getJSONArray("drinks");
+
+                        for (int i =0; i<jsonArray.length(); i++){
+                            JSONObject chickenObj = jsonArray.getJSONObject(i);
+                            String name = chickenObj.getString("strDrink");
+                            String imgUrl = chickenObj.getString("strDrinkThumb");
+                            int id = chickenObj.getInt("idDrink");
+
+                            FoodCategory foodCategory = new FoodCategory(name,imgUrl,id);
+                            oridinaryDrinkList.add(foodCategory);
+                            ordinaryDrinkListDATA.setValue(oridinaryDrinkList);
+                        }
+                    }catch (JSONException e){
+                        e.printStackTrace();
+                    }
+                }else {
+                    Log.e("Repository","empty drink list");
                 }
             }
 
@@ -208,6 +269,8 @@ public class Repository {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }else {
+                    Log.e("Repository","empty meal list");
                 }
             }
 

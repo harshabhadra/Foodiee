@@ -7,6 +7,7 @@
     <dist:module dist:instant="true" />
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -16,18 +17,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".YoutubeVideoActivity"
-            android:parentActivityName=".FoodDetailsActiviy">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value=".FoodDetailsActiviy"/>
-        </activity>
         <activity
             android:name=".BookMarkActivity"
             android:label="Bookmarks"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.android.foodie.MainActivity" />
         </activity>
-        <activity android:name=".FoodDetailsActiviy">
+        <activity android:name=".FoodDetailsActiviy"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"
+            >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.android.foodie.MainActivity" />
         </activity>
         <activity android:name=".SearchResultActivity">
             <intent-filter>
@@ -44,7 +50,9 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="screenSize|orientation">
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:background="@color/cardview_shadow_end_color"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".BookMarkActivity">
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -15,6 +15,6 @@
     <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/bookmark_recycler"
        android:layout_width="match_parent"
-       android:layout_height="match_parent">
+       android:layout_height="wrap_content">
    </androidx.recyclerview.widget.RecyclerView>
 </FrameLayout>

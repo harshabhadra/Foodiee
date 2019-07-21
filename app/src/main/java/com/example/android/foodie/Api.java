@@ -32,7 +32,11 @@ public interface Api {
 
     //Get ordinary drinks
     @GET("/api/json/v1/1/filter.php?c=Ordinary_Drink")
-    Call<String>getChickenItems();
+    Call<String> getOrdinaryDrinks();
+
+    //Get cocktail drinks
+    @GET("/api/json/v1/1/filter.php?c=Cocktail")
+    Call<String>getCockTails();
 
     //Get drinks details by id
     @GET("/api/json/v1/1/lookup.php?")

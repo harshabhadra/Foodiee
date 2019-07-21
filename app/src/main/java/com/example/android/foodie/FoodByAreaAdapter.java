@@ -14,64 +14,64 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class RandomAdapter extends RecyclerView.Adapter<RandomAdapter.RandomViewHolder> {
+public class FoodByAreaAdapter extends RecyclerView.Adapter<FoodByAreaAdapter.FoodByAreaViewHolder> {
 
     LayoutInflater inflater;
-    List<FoodCategory>randomList;
+    List<FoodCategory> FoodByAreaItemList;
     AreaItemClickListener areaItemClickListener;
 
     public interface AreaItemClickListener{
         void onAreaClick(int position);
     }
 
-    public RandomAdapter(Context context,AreaItemClickListener listener, List<FoodCategory> randomList) {
+    public FoodByAreaAdapter(Context context, AreaItemClickListener listener, List<FoodCategory> FoodByAreaItemList) {
 
         inflater = LayoutInflater.from(context);
         areaItemClickListener = listener;
-        this.randomList = randomList;
+        this.FoodByAreaItemList = FoodByAreaItemList;
     }
 
     @NonNull
     @Override
-    public RandomViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public FoodByAreaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = inflater.inflate(R.layout.random_food,parent,false);
-        return new RandomViewHolder(view);
+        return new FoodByAreaViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RandomViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FoodByAreaViewHolder holder, int position) {
 
-        if (randomList != null) {
-            Picasso.get().load(randomList.get(position).getFoodImage())
+        if (FoodByAreaItemList != null) {
+            Picasso.get().load(FoodByAreaItemList.get(position).getFoodImage())
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .error(R.drawable.ic_launcher_background)
                     .resize(3000, 4000)
                     .onlyScaleDown()
                     .centerCrop()
                     .into(holder.imageView);
-            holder.textView.setText(randomList.get(position).getFoodName());
+            holder.textView.setText(FoodByAreaItemList.get(position).getFoodName());
         }
     }
 
     @Override
     public int getItemCount() {
-        return randomList.size();
+        return FoodByAreaItemList.size();
     }
 
     public FoodCategory getAreaFood(int index){
-        if (randomList!= null){
-            return randomList.get(index);
+        if (FoodByAreaItemList != null){
+            return FoodByAreaItemList.get(index);
         }
         return null;
     }
 
-    public class RandomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class FoodByAreaViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         ImageView imageView;
         TextView textView;
 
-        public RandomViewHolder(@NonNull View itemView) {
+        public FoodByAreaViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imageView = itemView.findViewById(R.id.iv_random_image);

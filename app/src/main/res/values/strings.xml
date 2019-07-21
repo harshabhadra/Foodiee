@@ -9,6 +9,7 @@
     <string name="watch_video">WATCH VIDEO</string>
     <string name="drinks">Drinks</string>
     <string name="description">Description</string>
+    <string name="no_internet">NO_INTERNET</string>
 
     <string-array name="area_list">
         <item>Indian</item>
