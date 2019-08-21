@@ -162,7 +162,7 @@ public class FoodDetailsActiviy extends AppCompatActivity {
                         public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
                             if (!b) {
                                 player = youTubePlayer;
-                                player.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                                player.setPlayerStyle(YouTubePlayer.PlayerStyle.MINIMAL);
                                 player.loadVideo(videoCode);
                             }
                         }
